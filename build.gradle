@@ -29,7 +29,6 @@ subprojects {
         }
 
         modCompileOnlyApi("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
-        modCompileOnlyApi("curse.maven:jade-324717:${jade_forge_id}")
         modCompileOnly "dev.emi:emi-xplat-intermediary:${emi_version}:api"
     }
 }
@@ -92,9 +91,17 @@ allprojects {
 
         maven {
             // saps.dev Maven (KubeJS and Rhino)
-            url = "https://maven.saps.dev/releases"
+            url "https://maven.latvian.dev/releases"
             content {
                 includeGroup "dev.latvian.mods"
+                includeGroup "dev.latvian.apps"
+            }
+        }
+
+        maven {
+            url 'https://jitpack.io'
+            content {
+                includeGroup "com.github.rtyley"
             }
         }
 
@@ -178,15 +185,6 @@ publishMods {
         minecraftVersions.add("${minecraft_version}")
     }
 
-    curseforge("curseforgeForge") {
-        from cfOptions
-        file project(":forge")
-        modLoaders.add("forge")
-        displayName = "${mod_name} - Forge ${minecraft_version} - ${mod_version}"
-        optional("jei")
-        optional("create")
-    }
-
     curseforge("curseforgeFabric") {
         from cfOptions
         file project(":fabric")
@@ -197,15 +195,6 @@ publishMods {
         requires("forge-config-api-port-fabric")
         optional("jei")
         optional("create-fabric")
-    }
-
-    modrinth("modrinthForge") {
-        from mrOptions
-        file project(":forge")
-        modLoaders.add("forge")
-        displayName = "${mod_name} - ${mod_version}"
-        optional("jei")
-        optional("create")
     }
 
     modrinth("modrinthFabric") {

@@ -8,7 +8,7 @@ import io.github.mortuusars.exposure.command.ExposureCommand;
 import io.github.mortuusars.exposure.command.ShaderCommand;
 import io.github.mortuusars.exposure.command.TestCommand;
 import io.github.mortuusars.exposure.data.Lenses;
-import io.github.mortuusars.exposure.fabric.integration.create.CreateFilmDeveloping;
+//import io.github.mortuusars.exposure.fabric.integration.create.CreateFilmDeveloping;
 import io.github.mortuusars.exposure.fabric.resources.FabricLensesDataLoader;
 import io.github.mortuusars.exposure.integration.ModCompatibilityClient;
 import io.github.mortuusars.exposure.network.fabric.PacketsImpl;
@@ -37,9 +37,6 @@ public class ExposureFabric implements ModInitializer {
         Exposure.init();
 
         ModConfigEvents.reloading(Exposure.ID).register(config -> {
-            if (config.getType() == ModConfig.Type.COMMON && FabricLoader.getInstance().isModLoaded("create")) {
-                CreateFilmDeveloping.clearCachedData();
-            }
 
             if (config.getType() == ModConfig.Type.CLIENT) {
                 ModCompatibilityClient.handle();

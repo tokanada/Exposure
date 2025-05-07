@@ -22,7 +22,7 @@ dependencies {
 
     modCompileOnlyApi("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
 
-    modCompileOnlyApi("dev.latvian.mods:kubejs:${kubejs_version}")
+    //modCompileOnlyApi("dev.latvian.mods:kubejs:${kubejs_version}")
 
     modCompileOnly("curse.maven:real-camera-851574:5328994")
 

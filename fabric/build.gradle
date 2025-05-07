@@ -43,7 +43,7 @@ dependencies {
 
     modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${forge_config_api_version}"
 
-    modCompileOnlyApi("dev.latvian.mods:kubejs-fabric:${kubejs_version}")
+//    modCompileOnlyApi("dev.latvian.mods:kubejs-fabric:${kubejs_version}")
 //    modRuntimeOnly("dev.latvian.mods:kubejs-fabric:${kubejs_version}")
 //    modRuntimeOnly("curse.maven:probejs-585406:${probejs_fabric_id}")
 
@@ -58,7 +58,7 @@ dependencies {
     modRuntimeOnly("maven.modrinth:sodium:mc1.20.1-0.5.13-fabric")
 
     // Create
-    modCompileOnly("com.simibubi.create:create-fabric-${minecraft_version}:${create_fabric_version}")
+//    modCompileOnly("com.simibubi.create:create-fabric-${minecraft_version}:${create_fabric_version}")
     // modRuntimeOnly("com.simibubi.create:create-fabric-${minecraft_version}:${create_fabric_version}")
 
     // C2ME

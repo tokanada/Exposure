@@ -11,10 +11,7 @@
     "MouseHandlerFabricMixin"
   ],
   "mixins": [
-    "AlbumItemFabricMixin",
-    "create.CreateEmiPluginMixin",
-    "create.RecipeTypesMixin",
-    "create.SpoutDevelopingMixin"
+    "AlbumItemFabricMixin"
   ],
   "injectors": {
     "defaultRequire": 1
