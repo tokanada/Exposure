@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://i.imgur.com/twOn0Uf.png" width="256">
     <br>
-    <img alt="Fabric 1.20.4" src="https://img.shields.io/badge/Fabric%2FQuit-1.20.4-orange">
+    <img alt="Fabric/Quilt - 1.20.4" src="https://img.shields.io/badge/Fabric%2FQuilt-1.20.4-orange">
     <br>
   <a href="https://curseforge.com/minecraft/mc-mods/exposure"><img src="https://cf.way2muchnoise.eu/871755.svg" alt="curseforge"></a>
   <a href="https://modrinth.com/mod/exposure"><img src="https://img.shields.io/modrinth/dt/hB899VmG?logo=modrinth&label=&suffix=%20&style=flat&color=242629&labelColor=5ca424&logoColor=1c1c1c" alt="modrinth"></a>
