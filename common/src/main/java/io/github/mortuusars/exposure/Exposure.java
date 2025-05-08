@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure;
 
 import com.google.common.base.Preconditions;
 import com.mojang.logging.LogUtils;
-import io.github.mortuusars.exposure.advancement.trigger.FrameExposedTrigger;
+//import io.github.mortuusars.exposure.advancement.trigger.FrameExposedTrigger;
 import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.block.LightroomBlock;
 import io.github.mortuusars.exposure.block.entity.FlashBlockEntity;
@@ -91,7 +91,7 @@ public class Exposure {
                         .lightLevel(state -> 15)));
 
         public static final Supplier<FlashBlock> FLASH = Register.block("flash",
-                () -> new FlashBlock(BlockBehaviour.Properties.copy(net.minecraft.world.level.block.Blocks.AIR)
+                () -> new FlashBlock(BlockBehaviour.Properties.ofLegacyCopy(net.minecraft.world.level.block.Blocks.AIR)
                         .strength(-1.0F, 3600000.8F)
                         .noLootTable()
                         .mapColor(MapColor.NONE)
@@ -273,15 +273,15 @@ public class Exposure {
         }
     }
 
-    public static class Advancements {
-        public static FrameExposedTrigger FILM_FRAME_EXPOSED = new FrameExposedTrigger();
-        public static PlayerTrigger PHOTOGRAPH_ENDERMAN_EYES = new PlayerTrigger(Exposure.resource("photograph_enderman_eyes"));
-
-        public static void register() {
-            CriteriaTriggers.register(FILM_FRAME_EXPOSED);
-            CriteriaTriggers.register(PHOTOGRAPH_ENDERMAN_EYES);
-        }
-    }
+//    public static class Advancements {
+//        public static FrameExposedTrigger FILM_FRAME_EXPOSED = new FrameExposedTrigger();
+//        public static PlayerTrigger PHOTOGRAPH_ENDERMAN_EYES = new PlayerTrigger(Exposure.resource("photograph_enderman_eyes"));
+//
+//        public static void register() {
+//            CriteriaTriggers.register(FILM_FRAME_EXPOSED);
+//            CriteriaTriggers.register(PHOTOGRAPH_ENDERMAN_EYES);
+//        }
+//    }
 
     public static class Tags {
         public static class Items {

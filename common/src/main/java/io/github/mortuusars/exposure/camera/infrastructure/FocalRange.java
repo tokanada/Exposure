@@ -1,22 +1,23 @@
 package io.github.mortuusars.exposure.camera.infrastructure;
 
 import com.google.common.base.Preconditions;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.JsonElement; // Keep for potential interop if needed, but Codec is primary
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.data.Lenses;
+import io.github.mortuusars.exposure.data.Lenses; // Assuming this is for ofStack, not directly Codec related
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 public final class FocalRange implements StringRepresentable {
-    
+
     public static final int ALLOWED_MIN = 10;
     public static final int ALLOWED_MAX = 300;
 
@@ -25,9 +26,9 @@ public final class FocalRange implements StringRepresentable {
 
     public FocalRange(int min, int max) {
         Preconditions.checkArgument(ALLOWED_MIN <= min && min <= ALLOWED_MAX,
-                min + " is not in allowed range for 'min'.");
+                min + " is not in allowed range for 'min' [" + ALLOWED_MIN + "-" + ALLOWED_MAX + "].");
         Preconditions.checkArgument(ALLOWED_MIN <= max && max <= ALLOWED_MAX,
-                max + " is not in allowed range for 'max'.");
+                max + " is not in allowed range for 'max' [" + ALLOWED_MIN + "-" + ALLOWED_MAX + "].");
         Preconditions.checkArgument(min <= max,
                 "'min' should not be larger than 'max'. min: " + min + ", max: " + max);
         this.min = min;
@@ -35,12 +36,10 @@ public final class FocalRange implements StringRepresentable {
     }
 
     public FocalRange(int fixedValue) {
-        Preconditions.checkArgument(ALLOWED_MIN <= fixedValue && fixedValue <= ALLOWED_MAX,
-                fixedValue + " is not in allowed range: " + ALLOWED_MIN + "-" + ALLOWED_MAX);
-        this.min = fixedValue;
-        this.max = fixedValue;
+        this(fixedValue, fixedValue); // Delegate to the main constructor for validation
     }
 
+    // --- Network serialization ---
     public static FocalRange fromNetwork(FriendlyByteBuf buffer) {
         int min = buffer.readInt();
         int max = buffer.readInt();
@@ -52,26 +51,29 @@ public final class FocalRange implements StringRepresentable {
         buffer.writeInt(max);
     }
 
+    // --- Logic ---
     public boolean isPrime() {
         return min == max;
     }
 
+    // --- Static helpers / defaults ---
     public static FocalRange ofStack(ItemStack stack) {
         if (stack.isEmpty())
             return getDefault();
 
         if (!stack.is(Exposure.Tags.Items.LENSES)) {
-            Exposure.LOGGER.error(stack + " is not a valid lens. Should have '#exposure:lenses' tag.");
+            // Exposure.LOGGER.error(stack + " is not a valid lens. Should have '#exposure:lenses' tag."); // Keep logging if desired
             return getDefault();
         }
-
         return Lenses.getFocalRangeOf(stack).orElse(getDefault());
     }
 
     public static @NotNull FocalRange getDefault() {
+        // Assuming Config.Common.CAMERA_DEFAULT_FOCAL_RANGE.get() returns a string like "55" or "35-100"
         return parse(Config.Common.CAMERA_DEFAULT_FOCAL_RANGE.get());
     }
 
+    // --- StringRepresentable ---
     @Override
     public @NotNull String getSerializedName() {
         return isPrime() ? Integer.toString(min) : min + "-" + max;
@@ -84,30 +86,46 @@ public final class FocalRange implements StringRepresentable {
             return new FocalRange(prime);
         }
 
-        int min = Integer.parseInt(value.substring(0, dashIndex));
-        int max = Integer.parseInt(value.substring(dashIndex + 1));
-        return new FocalRange(min, max);
+        int minVal = Integer.parseInt(value.substring(0, dashIndex));
+        int maxVal = Integer.parseInt(value.substring(dashIndex + 1));
+        return new FocalRange(minVal, maxVal);
     }
 
-    public static FocalRange fromJson(@Nullable JsonElement json) {
-        if (json == null || json.isJsonNull())
-            throw new JsonSyntaxException("Item cannot be null");
+    // --- Codec Definition ---
+    // This codec handles the object form: {"min": X, "max": Y}
+    // OR the single number form for fixed values.
+    private static final Codec<FocalRange> OBJECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.INT.fieldOf("min").forGetter(FocalRange::min),
+            Codec.INT.fieldOf("max").forGetter(FocalRange::max)
+    ).apply(instance, FocalRange::new));
 
-        if (json.isJsonPrimitive()) {
-            int fixedValue = json.getAsInt();
-            return new FocalRange(fixedValue);
-        }
+    public static final Codec<FocalRange> CODEC = Codec.either(Codec.INT, OBJECT_CODEC)
+            .comapFlatMap(
+                    either -> either.map(
+                            fixedValue -> {
+                                try {
+                                    return DataResult.success(new FocalRange(fixedValue));
+                                } catch (IllegalArgumentException e) {
+                                    return DataResult.error(() -> "FocalRange from single int: " + e.getMessage());
+                                }
+                            },
+                            objectFocalRange -> DataResult.success(objectFocalRange)
+                    ),
+                    focalRange -> {
+                        if (focalRange.isPrime()) {
+                            return com.mojang.datafixers.util.Either.left(focalRange.min());
+                        } else {
+                            return com.mojang.datafixers.util.Either.right(focalRange);
+                        }
+                    }
+            );
 
-        if (json.isJsonObject()) {
-            JsonObject obj = json.getAsJsonObject();
-            int min = obj.get("min").getAsInt();
-            int max = obj.get("max").getAsInt();
-            return new FocalRange(min, max);
-        }
 
-        throw new JsonSyntaxException("Invalid FocalRange json. Expected a number or json object with 'min' and 'max'.");
-    }
+    // fromJson is now replaced by using FocalRange.CODEC.parse(...)
+    // public static FocalRange fromJson(@Nullable JsonElement json) { ... }
 
+
+    // --- Getters and Object overrides ---
     public int min() {
         return min;
     }
@@ -132,8 +150,8 @@ public final class FocalRange implements StringRepresentable {
     @Override
     public String toString() {
         if (isPrime())
-            return "FocalRange[" + "fixed=" + min + ']';
+            return "FocalRange[fixed=" + min + ']';
         else
-            return "FocalRange[" + "min=" + min + ", " + "max=" + max + ']';
+            return "FocalRange[min=" + min + ", max=" + max + ']';
     }
 }

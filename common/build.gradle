@@ -7,6 +7,7 @@ loom {
 }
 
 repositories {
+    // Forge Config Api Port
     maven {
         name = "Fuzs Mod Resources"
         url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
@@ -22,6 +23,9 @@ dependencies {
 
     modCompileOnlyApi("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
 
+    modCompileOnlyApi("curse.maven:jade-324717:${jade_fabric_id}")
+    modRuntimeOnly("curse.maven:jade-324717:${jade_fabric_id}") { transitive = false }
+
     //modCompileOnlyApi("dev.latvian.mods:kubejs:${kubejs_version}")
 
     modCompileOnly("curse.maven:real-camera-851574:5328994")
@@ -32,7 +36,8 @@ dependencies {
 
 //    modCompileOnly("curse.maven:architectury-${architectury_cf_version}")
 
-    api "fuzs.forgeconfigapiport:forgeconfigapiport-common:${forge_config_api_version}"
+    implementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${forge_config_api_version}"
+
 }
 
 publishing {

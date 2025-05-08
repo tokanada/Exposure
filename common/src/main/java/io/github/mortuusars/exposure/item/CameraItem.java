@@ -659,7 +659,7 @@ public class CameraItem extends Item {
         PlatformHelper.fireModifyFrameDataEvent(player, cameraStack, frameTag, entities);
 
         player.awardStat(Exposure.Stats.FILM_FRAMES_EXPOSED);
-        Exposure.Advancements.FILM_FRAME_EXPOSED.trigger(player, new ItemAndStack<>(cameraStack), frameTag, entities);
+    //    Exposure.Advancements.FILM_FRAME_EXPOSED.trigger(player, new ItemAndStack<>(cameraStack), frameTag, entities);
 
         addFrameToFilm(cameraStack, frameTag);
         onFrameAdded(player, cameraStack, frameTag, entities);
@@ -796,7 +796,7 @@ public class CameraItem extends Item {
                     // I wanted to implement this in a predicate,
                     // but it's tricky because EntitySubPredicates do not get the player in their 'match' method.
                     // So it's just easier to hardcode it like this.
-                    Exposure.Advancements.PHOTOGRAPH_ENDERMAN_EYES.trigger(player);
+                    //Exposure.Advancements.PHOTOGRAPH_ENDERMAN_EYES.trigger(player);
                 }
 
                 CompoundTag entityInfoTag = createEntityInFrameTag(entity, player, cameraStack);

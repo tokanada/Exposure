@@ -89,26 +89,16 @@ allprojects {
             }
         }
 
-        maven {
-            // saps.dev Maven (KubeJS and Rhino)
-            url "https://maven.latvian.dev/releases"
-            content {
-                includeGroup "dev.latvian.mods"
-                includeGroup "dev.latvian.apps"
-            }
-        }
-
-        maven {
-            url 'https://jitpack.io'
-            content {
-                includeGroup "com.github.rtyley"
-            }
-        }
-
         // EMI
         maven {
             name = "TerraformersMC"
             url = "https://maven.terraformersmc.com/"
+        }
+
+        // Forge Config Api Port
+        maven {
+            name = "Fuzs Mod Resources"
+            url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
         }
     }
 

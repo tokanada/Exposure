@@ -18,14 +18,11 @@ import snownee.jade.api.IServerDataProvider;
 import snownee.jade.api.ITooltip;
 import snownee.jade.api.config.IPluginConfig;
 import snownee.jade.api.ui.IElementHelper;
-import snownee.jade.api.view.IServerExtensionProvider;
 import snownee.jade.api.view.ViewGroup;
-import snownee.jade.impl.ui.ProgressArrowElement;
 
 import java.util.List;
 
-public enum LightroomComponentProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor>,
-        IServerExtensionProvider<LightroomBlockEntity, ItemStack> {
+public enum LightroomComponentProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
     INSTANCE;
 
     @Override
@@ -63,7 +60,7 @@ public enum LightroomComponentProvider implements IBlockComponentProvider, IServ
                 tooltip.append(helper.item(stack));
         }
 
-        tooltip.append(new ProgressArrowElement(tag.getFloat("Progress")));
+        tooltip.append(helper.progress(tag.getFloat("Progress")));
 
         tooltip.append(helper.item(ItemStack.of(tag.getCompound("Result"))));
 
@@ -95,11 +92,6 @@ public enum LightroomComponentProvider implements IBlockComponentProvider, IServ
 
             tag.putFloat("Progress", lightroomBlockEntity.getProgressPercentage());
         }
-    }
-
-    @Override
-    public @Nullable List<ViewGroup<ItemStack>> getGroups(ServerPlayer serverPlayer, ServerLevel serverLevel, LightroomBlockEntity lightroomBlockEntity, boolean b) {
-        return null;
     }
 
     @Override
