@@ -12,12 +12,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.Nullable;
-import snownee.jade.api.BlockAccessor;
-import snownee.jade.api.IBlockComponentProvider;
-import snownee.jade.api.IServerDataProvider;
-import snownee.jade.api.ITooltip;
+import snownee.jade.api.*;
 import snownee.jade.api.config.IPluginConfig;
 import snownee.jade.api.ui.IElementHelper;
+import snownee.jade.api.view.IServerExtensionProvider;
 import snownee.jade.api.view.ViewGroup;
 
 import java.util.List;
@@ -98,4 +96,5 @@ public enum LightroomComponentProvider implements IBlockComponentProvider, IServ
     public ResourceLocation getUid() {
         return ExposureJadePlugin.LIGHTROOM;
     }
+
 }

@@ -25,6 +25,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -50,6 +51,10 @@ import java.util.*;
 public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     public static final ResourceLocation MAIN_TEXTURE = Exposure.resource("textures/gui/lightroom.png");
     public static final ResourceLocation FILM_OVERLAYS_TEXTURE = Exposure.resource("textures/gui/lightroom_film_overlays.png");
+    public static final WidgetSprites PRINT_BUTTON_SPRITES = new WidgetSprites(
+            Exposure.resource("lightroom/print_button"),
+            Exposure.resource("lightroom/print_button_disabled"),
+            Exposure.resource("lightroom/print_button_highlighted"));
     public static final int FRAME_SIZE = 54;
 
     protected Player player;
@@ -79,9 +84,8 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
                 Lightroom.BLACK_SLOT, new Rect2i(238, 90, 18, 18)
         );
 
-        printButton = new ImageButton(leftPos + 117, topPos + 89, 22, 22, 176, 17,
-                22, MAIN_TEXTURE, 256, 256, this::onPrintButtonPressed,
-                Component.translatable("gui.exposure.lightroom.print"));
+        printButton = new ImageButton(leftPos + 117, topPos + 89, 22, 22, PRINT_BUTTON_SPRITES,
+                this::onPrintButtonPressed, Component.translatable("gui.exposure.lightroom.print"));
 
         MutableComponent tooltip = Component.translatable("gui.exposure.lightroom.print");
         if (player.isCreative()) {
@@ -118,7 +122,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         updateButtons();
 
-        renderBackground(guiGraphics);
+//        renderBackground(guiGraphics);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         renderTooltip(guiGraphics, mouseX, mouseY);
     }
@@ -319,11 +323,11 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        boolean handled = super.mouseScrolled(mouseX, mouseY, delta);
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        boolean handled = super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
 
         if (!handled) {
-            if (delta >= 0.0 && isOverCenterFrame((int) mouseX, (int) mouseY)) // Scroll Up
+            if (scrollY >= 0.0 && isOverCenterFrame((int) mouseX, (int) mouseY)) // Scroll Up
                 enterFrameInspectMode();
         }
 

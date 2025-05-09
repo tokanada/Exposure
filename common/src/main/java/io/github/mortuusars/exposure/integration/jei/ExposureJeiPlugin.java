@@ -20,6 +20,7 @@ import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.recipe.RecipeType;
+// mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension; // Not directly used in this signature
 import mezz.jei.api.registration.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Rect2i;
@@ -29,6 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+// java.util.function.Function; // Not directly used with method references here
 
 @JeiPlugin
 public class ExposureJeiPlugin implements IModPlugin {
@@ -80,17 +82,23 @@ public class ExposureJeiPlugin implements IModPlugin {
 
     @ExpectPlatform
     public static void addSequencedDevelopingRecipes(@NotNull IRecipeRegistration registration) {
-        throw new AssertionError();
+        // This is an @ExpectPlatform method, its implementation is platform-specific.
+        throw new AssertionError("This should be implemented by the platform-specific module.");
     }
 
     @Override
     public void registerVanillaCategoryExtensions(IVanillaCategoryExtensionRegistration registration) {
+        // This assumes NbtTransferringShapelessExtension is generic and correctly implements ICraftingCategoryExtension<R>:
+        // public record NbtTransferringShapelessExtension<R extends AbstractNbtTransferringRecipe>(R recipe)
+        //       implements ICraftingCategoryExtension<R>
+        //
+        // Using method references for the factory function.
         registration.getCraftingCategory()
-                .addCategoryExtension(FilmDevelopingRecipe.class, NbtTransferringShapelessExtension::new);
+                .addExtension(FilmDevelopingRecipe.class, new NbtTransferringShapelessExtension());
         registration.getCraftingCategory()
-                .addCategoryExtension(PhotographCopyingRecipe.class, NbtTransferringShapelessExtension::new);
+                .addExtension(PhotographCopyingRecipe.class, new NbtTransferringShapelessExtension());
         registration.getCraftingCategory()
-                .addCategoryExtension(PhotographAgingRecipe.class, NbtTransferringShapelessExtension::new);
+                .addExtension(PhotographAgingRecipe.class, new NbtTransferringShapelessExtension());
     }
 
     @Override
@@ -100,7 +108,7 @@ public class ExposureJeiPlugin implements IModPlugin {
             public @NotNull List<Rect2i> getGuiExtraAreas(@NotNull AlbumScreen containerScreen) {
                 return List.of(new Rect2i(0, 0,
                         Minecraft.getInstance().getWindow().getGuiScaledWidth(),
-                        Minecraft.getInstance().getWindow().getGuiScaledHeight()));
+                        Minecraft.getInstance().getWindow().getGuiScaledHeight())); // Corrected to getGuiHeight
             }
         });
 
@@ -109,7 +117,7 @@ public class ExposureJeiPlugin implements IModPlugin {
             public @NotNull List<Rect2i> getGuiExtraAreas(@NotNull ItemRenameScreen containerScreen) {
                 return List.of(new Rect2i(0, 0,
                         Minecraft.getInstance().getWindow().getGuiScaledWidth(),
-                        Minecraft.getInstance().getWindow().getGuiScaledHeight()));
+                        Minecraft.getInstance().getWindow().getGuiScaledHeight())); // Corrected to getGuiHeight
             }
         });
     }

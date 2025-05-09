@@ -1,78 +1,73 @@
 package io.github.mortuusars.exposure.recipe;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import io.github.mortuusars.exposure.Exposure;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.mortuusars.exposure.Exposure; // Assuming Exposure.RecipeSerializers is your registry class
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.ShapedRecipe;
 import org.jetbrains.annotations.NotNull;
 
-public class PhotographAgingRecipe extends AbstractNbtTransferringRecipe{
-    public PhotographAgingRecipe(ResourceLocation id, Ingredient transferIngredient,
+import java.util.ArrayList; // Added for new ArrayList<>()
+import java.util.List;
+
+public class PhotographAgingRecipe extends AbstractNbtTransferringRecipe {
+
+    public PhotographAgingRecipe(CraftingBookCategory category, Ingredient transferIngredient,
                                  NonNullList<Ingredient> ingredients, ItemStack result) {
-        super(id, transferIngredient, ingredients, result);
+        super(category, transferIngredient, ingredients, result);
     }
 
     @Override
     public @NotNull RecipeSerializer<?> getSerializer() {
-        return Exposure.RecipeSerializers.PHOTOGRAPH_AGING.get();
+        return Exposure.RecipeSerializers.PHOTOGRAPH_AGING.get(); // Ensure this path is correct
     }
 
     public static class Serializer implements RecipeSerializer<PhotographAgingRecipe> {
+        private static final Codec<PhotographAgingRecipe> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                CraftingBookCategory.CODEC.fieldOf("category").forGetter(AbstractNbtTransferringRecipe::category),
+                Ingredient.CODEC_NONEMPTY.fieldOf("photograph_ingredient").forGetter(AbstractNbtTransferringRecipe::getTransferIngredient),
+                Ingredient.CODEC_NONEMPTY.listOf().xmap(
+                        (List<Ingredient> list) -> { // Explicit conversion from List to NonNullList
+                            NonNullList<Ingredient> nnl = NonNullList.create();
+                            nnl.addAll(list);
+                            return nnl;
+                        },
+                        (NonNullList<Ingredient> nnList) -> new ArrayList<>(nnList) // Explicit conversion from NonNullList to ArrayList (List)
+                ).fieldOf("ingredients").forGetter(recipe -> recipe.recipeIngredients),
+                ItemStack.CODEC.fieldOf("result").forGetter(AbstractNbtTransferringRecipe::getDefinedResultItem)
+        ).apply(instance, PhotographAgingRecipe::new));
+
         @Override
-        public @NotNull PhotographAgingRecipe fromJson(ResourceLocation recipeId, JsonObject serializedRecipe) {
-            Ingredient photographIngredient = Ingredient.fromJson(GsonHelper.getNonNull(serializedRecipe, "photograph"));
-            NonNullList<Ingredient> ingredients = getIngredients(GsonHelper.getAsJsonArray(serializedRecipe, "ingredients"));
-            ItemStack result = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(serializedRecipe, "result"));
-
-            if (photographIngredient.isEmpty())
-                throw new JsonParseException("Recipe should have 'photograph' ingredient.");
-
-            return new PhotographAgingRecipe(recipeId, photographIngredient, ingredients, result);
+        public @NotNull Codec<PhotographAgingRecipe> codec() {
+            return CODEC;
         }
 
         @Override
-        public @NotNull PhotographAgingRecipe fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
-            Ingredient transferredIngredient = Ingredient.fromNetwork(buffer);
+        public @NotNull PhotographAgingRecipe fromNetwork(@NotNull FriendlyByteBuf buffer) {
+            CraftingBookCategory category = buffer.readEnum(CraftingBookCategory.class);
+            Ingredient photographIngredient = Ingredient.fromNetwork(buffer);
             int ingredientsCount = buffer.readVarInt();
             NonNullList<Ingredient> ingredients = NonNullList.withSize(ingredientsCount, Ingredient.EMPTY);
-            ingredients.replaceAll(ignored -> Ingredient.fromNetwork(buffer));
+            for (int i = 0; i < ingredientsCount; i++) {
+                ingredients.set(i, Ingredient.fromNetwork(buffer));
+            }
             ItemStack result = buffer.readItem();
-
-            return new PhotographAgingRecipe(recipeId, transferredIngredient, ingredients, result);
+            return new PhotographAgingRecipe(category, photographIngredient, ingredients, result);
         }
 
         @Override
-        public void toNetwork(FriendlyByteBuf buffer, PhotographAgingRecipe recipe) {
+        public void toNetwork(@NotNull FriendlyByteBuf buffer, @NotNull PhotographAgingRecipe recipe) {
+            buffer.writeEnum(recipe.category());
             recipe.getTransferIngredient().toNetwork(buffer);
-            buffer.writeVarInt(recipe.getIngredients().size());
-            for (Ingredient ingredient : recipe.getIngredients()) {
+            buffer.writeVarInt(recipe.recipeIngredients.size());
+            for (Ingredient ingredient : recipe.recipeIngredients) {
                 ingredient.toNetwork(buffer);
             }
-            buffer.writeItem(recipe.getResult());
-        }
-
-        private NonNullList<Ingredient> getIngredients(JsonArray jsonArray) {
-            NonNullList<Ingredient> ingredients = NonNullList.create();
-
-            for (int i = 0; i < jsonArray.size(); ++i) {
-                Ingredient ingredient = Ingredient.fromJson(jsonArray.get(i));
-                if (!ingredient.isEmpty())
-                    ingredients.add(ingredient);
-            }
-
-            if (ingredients.isEmpty())
-                throw new JsonParseException("No ingredients for a recipe.");
-            else if (ingredients.size() > 3 * 3)
-                throw new JsonParseException("Too many ingredients for a recipe. The maximum is 9.");
-            return ingredients;
+            buffer.writeItem(recipe.getDefinedResultItem());
         }
     }
 }

@@ -14,10 +14,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -58,8 +55,11 @@ public class ClientGUI {
             return;
         }
 
-        Optional<NonNullList<Ingredient>> recipeIngredients = level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING)
+        Optional<NonNullList<Ingredient>> recipeIngredients = Minecraft.getInstance().level
+                .getRecipeManager()
+                .getAllRecipesFor(RecipeType.CRAFTING)
                 .stream()
+                .map(RecipeHolder::value)
                 .filter(recipeFilter)
                 .findFirst()
                 .map(Recipe::getIngredients);

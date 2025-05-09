@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.gui.screen.album;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.Tesselator;
+import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.render.PhotographRenderProperties;
@@ -10,8 +11,10 @@ import io.github.mortuusars.exposure.render.PhotographRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Rect2i;
@@ -23,7 +26,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+
 public class PhotographSlotButton extends ImageButton {
+    public static final WidgetSprites PINS_SPRITES = new WidgetSprites(
+            Exposure.resource("album/pins"), Exposure.resource("album/pins_highlighted"));
+    public static final WidgetSprites PINS_EMPTY_SPRITES = new WidgetSprites(
+            Exposure.resource("album/pins_empty"), Exposure.resource("album/pins_empty_highlighted"));
 
     protected final Rect2i exposureArea;
     protected final OnPress onRightButtonPress;
@@ -34,8 +42,8 @@ public class PhotographSlotButton extends ImageButton {
     public PhotographSlotButton(Rect2i exposureArea, int x, int y, int width, int height, int xTexStart, int yTexStart,
                                 int yDiffTex, ResourceLocation resourceLocation, int textureWidth, int textureHeight,
                                 OnPress onLeftButtonPress, OnPress onRightButtonPress, Supplier<ItemStack> photographGetter, boolean isEditable) {
-        super(x, y, width, height, xTexStart, yTexStart, yDiffTex, resourceLocation, textureWidth, textureHeight, onLeftButtonPress,
-                Component.translatable("item.exposure.photograph"));
+        super(x, y, width, height, PINS_EMPTY_SPRITES, onLeftButtonPress, Component.translatable("item.exposure.photograph"));
+
         this.exposureArea = exposureArea;
         this.onRightButtonPress = onRightButtonPress;
         this.photograph = photographGetter;
@@ -56,7 +64,7 @@ public class PhotographSlotButton extends ImageButton {
             PhotographRenderProperties renderProperties = PhotographRenderProperties.get(photograph);
 
             // Paper
-            renderTexture(guiGraphics, renderProperties.getAlbumPaperTexture(),
+            guiGraphics.blit(renderProperties.getAlbumPaperOverlayTexture(),
                     getX(), getY(), 0, 0, 0, width, height, width, height);
 
             // Exposure
@@ -74,7 +82,7 @@ public class PhotographSlotButton extends ImageButton {
             if (renderProperties.hasAlbumPaperOverlayTexture()) {
                 guiGraphics.pose().pushPose();
                 guiGraphics.pose().translate(0, 0, 2);
-                renderTexture(guiGraphics, renderProperties.getAlbumPaperOverlayTexture(),
+                guiGraphics.blit(renderProperties.getAlbumPaperOverlayTexture(),
                         getX(), getY(), 0, 0, 0, width, height, width, height);
                 guiGraphics.pose().popPose();
             }
@@ -84,8 +92,9 @@ public class PhotographSlotButton extends ImageButton {
         }
 
         // Album pins
-        int xTex = xTexStart + (hasPhotograph ? getWidth() : 0);
-        renderTexture(guiGraphics, resourceLocation, getX(), getY(), xTex, yTexStart, yDiffTex, width, height, textureWidth, textureHeight);
+        WidgetSprites sprites = hasPhotograph ? PINS_SPRITES : PINS_EMPTY_SPRITES;
+        ResourceLocation resourceLocation = sprites.get(this.isActive(), this.isHoveredOrFocused());
+        guiGraphics.blitSprite(resourceLocation, this.getX(), this.getY(), this.width, this.height);
     }
 
     public void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
@@ -108,7 +117,7 @@ public class PhotographSlotButton extends ImageButton {
 
         if (isFocused()) {
             guiGraphics.renderTooltip(Minecraft.getInstance().font, Lists.transform(itemTooltip,
-                    Component::getVisualOrderText), createTooltipPositioner(), mouseX, mouseY);
+                    Component::getVisualOrderText), DefaultTooltipPositioner.INSTANCE, mouseX, mouseY);
         }
         else
             guiGraphics.renderTooltip(Minecraft.getInstance().font, itemTooltip, Optional.empty(), mouseX, mouseY);
@@ -130,13 +139,13 @@ public class PhotographSlotButton extends ImageButton {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        if (delta > 0 && clicked(mouseX, mouseY) && hasPhotograph) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (scrollY > 0 && clicked(mouseX, mouseY) && hasPhotograph) {
             this.onPress.onPress(this);
             return true;
         }
 
-        return super.mouseScrolled(mouseX, mouseY, delta);
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override

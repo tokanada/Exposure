@@ -44,7 +44,7 @@ public record CameraAddFrameC2SP(InteractionHand hand, CompoundTag frame, List<U
 
     public static CameraAddFrameC2SP fromBuffer(FriendlyByteBuf buffer) {
         InteractionHand hand = buffer.readEnum(InteractionHand.class);
-        @Nullable CompoundTag frame = buffer.readAnySizeNbt();
+        @Nullable CompoundTag frame = buffer.readNbt();
         if (frame == null)
             frame = new CompoundTag();
 

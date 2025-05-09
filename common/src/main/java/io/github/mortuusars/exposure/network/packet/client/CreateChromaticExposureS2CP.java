@@ -27,7 +27,7 @@ public record CreateChromaticExposureS2CP(CompoundTag red, CompoundTag green, Co
     }
 
     public static CreateChromaticExposureS2CP fromBuffer(FriendlyByteBuf buffer) {
-        return new CreateChromaticExposureS2CP(buffer.readAnySizeNbt(), buffer.readAnySizeNbt(), buffer.readAnySizeNbt(), buffer.readUtf());
+        return new CreateChromaticExposureS2CP(buffer.readNbt(), buffer.readNbt(), buffer.readNbt(), buffer.readUtf());
     }
 
     @Override

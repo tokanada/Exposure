@@ -24,7 +24,7 @@ public record OnFrameAddedS2CP(CompoundTag frame) implements IPacket {
     }
 
     public static OnFrameAddedS2CP fromBuffer(FriendlyByteBuf buffer) {
-        @Nullable CompoundTag frame = buffer.readAnySizeNbt();
+        @Nullable CompoundTag frame = buffer.readNbt();
         if (frame == null)
             frame = new CompoundTag();
         return new OnFrameAddedS2CP(frame);

@@ -28,7 +28,7 @@ public record ExposureDataPartPacket(String id, int width, int height, CompoundT
 
     public static ExposureDataPartPacket fromBuffer(FriendlyByteBuf buffer) {
         return new ExposureDataPartPacket(buffer.readUtf(), buffer.readInt(), buffer.readInt(),
-                buffer.readAnySizeNbt(), buffer.readInt(), buffer.readByteArray());
+                buffer.readNbt(), buffer.readInt(), buffer.readByteArray());
     }
 
     @Override
